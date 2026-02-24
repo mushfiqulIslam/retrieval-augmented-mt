@@ -1,7 +1,8 @@
 import argparse
 import logging
 
-from config import ExperimentConfig
+from systems.run_all_experiments import run_all_experiments
+from utils.config import ExperimentConfig
 
 logging.basicConfig(
     level=logging.INFO,
@@ -10,8 +11,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def run_all_experiments(cfg: ExperimentConfig):
-    pass
 
 def parse_args():
     parser = argparse.ArgumentParser(
