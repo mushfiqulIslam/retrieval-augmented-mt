@@ -6,12 +6,8 @@ import numpy as np
 import torch
 
 from utils.config import ExperimentConfig
+from utils.data import load_test_set
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    datefmt="%H:%M:%S",
-)
 logger = logging.getLogger(__name__)
 
 
@@ -32,3 +28,6 @@ def run_all_experiments(cfg: ExperimentConfig):
     set_all_seeds(cfg.seed)
     cfg.save(os.path.join(cfg.output_dir, "experiment_config.json"))
     logger.info(f"Config saved to {cfg.output_dir}/experiment_config.json")
+
+    logger.info("\n═════════════════ LOADING DATA ═════════════════")
+    test_pairs = load_test_set(cfg.data, seed=cfg.seed)
