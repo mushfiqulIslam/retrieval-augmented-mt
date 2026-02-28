@@ -55,7 +55,7 @@ class DataConfig:
     test_size: int = 200
 
     # Retrieval corpus: separate English documents
-    corpus_source: str = "builtin"
+    corpus_source: str = "hf_dataset"
     corpus_file: Optional[str] = None
     corpus_size: int = 500
 
