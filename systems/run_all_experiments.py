@@ -14,6 +14,7 @@ from evaluator.master_evaluator import MasterEvaluator
 from retriever.base import BaseRetriever
 from retriever.bm_25_retriever import BM25Retriever
 from retriever.cached_retriever import CachedRetriever
+from retriever.dense_retriever import DenseRetriever
 from systems.system_a import run_system_a
 from systems.system_b import run_system_b
 from systems.system_c import run_system_c, run_system_c_random
@@ -45,7 +46,7 @@ def build_retriever(corpus: List[Dict], cfg: RetrieverConfig) -> BaseRetriever:
     if cfg.method == "bm25":
         return BM25Retriever(corpus, cfg)
     elif cfg.method == "dense":
-        raise ValueError("Will implement dense retriever later.")
+        return DenseRetriever(corpus, cfg)
     else:
         raise ValueError(f"Unknown retriever method: {cfg.method!r}. Choose 'bm25' or 'dense'.")
 
