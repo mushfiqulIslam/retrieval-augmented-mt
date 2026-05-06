@@ -222,3 +222,27 @@ BUILTIN_CORPUS: List[Dict] = [
         )
     },
 ]
+
+
+BUILTIN_TEST_SET: List[Dict] = [
+    {
+        "en": "Helsinki is the capital and largest city of Finland.",
+        "fi": "Helsinki on Suomen pääkaupunki ja suurin kaupunki.",
+    },
+    {
+        "en": "The weather in Northern Europe varies significantly across seasons.",
+        "fi": "Pohjois-Euroopan sää vaihtelee huomattavasti vuodenaikojen mukaan.",
+    },
+    {
+        "en": "Traditional Finnish food includes rye bread, fish, potatoes, and berries.",
+        "fi": "Perinteiseen suomalaiseen ruokaan kuuluu ruisleipää, kalaa, perunoita ja marjoja.",
+    },
+    {
+        "en": "Trains and buses connect cities and towns across Finland efficiently.",
+        "fi": "Junat ja bussit yhdistävät Suomen kaupungit ja kunnat tehokkaasti.",
+    },
+    {
+        "en": "Finland declared independence from Russia in 1917.",
+        "fi": "Suomi julistautui itsenäiseksi Venäjästä vuonna 1917.",
+    },
+]

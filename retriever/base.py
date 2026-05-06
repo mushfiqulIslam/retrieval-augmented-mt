@@ -8,9 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRetriever(ABC):
-    def __init__(self, corpus: List[Dict], cfg: RetrieverConfig):
+    def __init__(self, corpus: List[Dict], cfg: RetrieverConfig, device: str = "cpu"):
         self.corpus = corpus
         self.cfg    = cfg
+        self.device = device
         self._build_index()
 
     @abstractmethod

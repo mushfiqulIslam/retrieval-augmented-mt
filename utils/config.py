@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, fields, asdict
 from typing import List, Optional
 import json
 import os
@@ -8,6 +8,7 @@ import os
 class RetrieverConfig:
     """BM25 retriever settings — frozen after setup."""
     method: str = "bm25"          # "bm25" | "dense"
+    methods: List[str] = field(default_factory=lambda: ["bm25"])
     top_k_values: List[int] = field(default_factory=lambda: [3, 5])
 
     # BM25 hyperparameters (Okapi BM25 defaults)
@@ -50,6 +51,7 @@ class TranslatorConfig:
 class DataConfig:
     """Dataset settings."""
     # HuggingFace dataset for EN-FI parallel test set
+    test_source: str = "hf_dataset"  # "hf_dataset" | "builtin"
     dataset_name: str = "Helsinki-NLP/opus-100"
     dataset_config: str = "en-fi"
     test_size: int = 200
@@ -76,6 +78,7 @@ class ExperimentConfig:
     """Top-level experiment configuration."""
     seed: int = 42
     output_dir: str = "./results"
+    device: str = "auto"  # "auto" | "cpu" | "cuda" | "mps"
     save_translations: bool = True
     save_scores: bool = True
     run_system_a: bool = True   # MT-Only baseline
@@ -98,8 +101,17 @@ class ExperimentConfig:
     def load(cls, path: str) -> "ExperimentConfig":
         with open(path) as f:
             data = json.load(f)
-        cfg = cls()
+
+        nested_keys = {"retriever", "context_selector", "translator", "data", "evaluation"}
+        top_level = {
+            field.name: data[field.name]
+            for field in fields(cls)
+            if field.name in data and field.name not in nested_keys
+        }
+        cfg = cls(**top_level)
         cfg.retriever        = RetrieverConfig(**data.get("retriever", {}))
+        if "retriever" in data and "methods" not in data["retriever"]:
+            cfg.retriever.methods = [cfg.retriever.method]
         cfg.context_selector = ContextSelectorConfig(**data.get("context_selector", {}))
         cfg.translator       = TranslatorConfig(**data.get("translator", {}))
         cfg.data             = DataConfig(**data.get("data", {}))

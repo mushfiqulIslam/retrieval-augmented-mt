@@ -54,13 +54,16 @@ class MasterEvaluator:
             scores.comet_metric_name = self._comet_eval.metric_name
             logger.info(f"  [{system_name}] {scores.comet_metric_name} = {scores.comet:.4f}")
 
-        # Hallucination
+        # Lightweight entity novelty heuristic
         if self._hall_eval:
             avg_rate, _ = self._hall_eval.compute_corpus_hallucination(
                 sources, hypotheses, contexts
             )
             scores.hallucination_rate = avg_rate
-            logger.info(f"  [{system_name}] Hallucination rate = {scores.hallucination_rate:.4f}")
+            logger.info(
+                f"  [{system_name}] Entity novelty heuristic rate = "
+                f"{scores.hallucination_rate:.4f}"
+            )
 
         # Context efficiency
         if self._eff_eval and any(t > 0 for t in ctx_tokens):

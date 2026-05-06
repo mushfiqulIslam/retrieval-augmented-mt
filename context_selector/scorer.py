@@ -2,13 +2,11 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
-import torch
 from sentence_transformers import SentenceTransformer
 
 from utils.config import ContextSelectorConfig
 
 logger = logging.getLogger(__name__)
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class BaseScorer(ABC):
@@ -29,15 +27,16 @@ class EmbeddingScorer(BaseScorer):
     Deterministic: same model, same input = same output.
     """
 
-    def __init__(self, model_name= "all-MiniLM-L6-v2"):
+    def __init__(self, model_name= "all-MiniLM-L6-v2", device: str = "cpu"):
         self.model_name = model_name
+        self.device = device
         self._model = None   # lazy load
 
     def _ensure_loaded(self):
         if self._model is None:
             try:
                 logger.info(f"Loading embedding scorer model: {self.model_name}")
-                self._model = SentenceTransformer(self.model_name, device=device)
+                self._model = SentenceTransformer(self.model_name, device=self.device)
             except ImportError:
                 raise ImportError(
                     "sentence-transformers is required for embedding scoring. "
@@ -110,8 +109,9 @@ class CrossEncoderScorer(BaseScorer):
     and produces a relevance score. More accurate than bi-encoder cosine sim.
     """
 
-    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
+    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2", device: str = "cpu"):
         self.model_name = model_name
+        self.device = device
         self._model = None
 
     def _ensure_loaded(self):
@@ -119,7 +119,7 @@ class CrossEncoderScorer(BaseScorer):
             try:
                 from sentence_transformers import CrossEncoder
                 logger.info(f"Loading cross-encoder model: {self.model_name}")
-                self._model = CrossEncoder(self.model_name, device=device)
+                self._model = CrossEncoder(self.model_name, device=self.device)
             except ImportError:
                 raise ImportError(
                     "sentence-transformers is required for cross-encoder scoring."
@@ -134,11 +134,11 @@ class CrossEncoderScorer(BaseScorer):
         return scores.tolist()
 
 
-def build_scorer(cfg: ContextSelectorConfig) -> BaseScorer:
+def build_scorer(cfg: ContextSelectorConfig, device: str = "cpu") -> BaseScorer:
     if cfg.scoring_method == "embedding":
-        return EmbeddingScorer(model_name=cfg.embedding_model)
+        return EmbeddingScorer(model_name=cfg.embedding_model, device=device)
     elif cfg.scoring_method == "cross_encoder":
-        return CrossEncoderScorer()
+        return CrossEncoderScorer(device=device)
     elif cfg.scoring_method == "lexical":
         return LexicalScorer()
     else:
