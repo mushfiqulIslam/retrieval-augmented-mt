@@ -40,8 +40,16 @@ def main():
         help="Retrieval method (default: bm25)",
     )
     parser.add_argument(
-        "--mode", choices=["generative", "extractive", "context"], default="generative",
-        help="QA mode: generative (Flan-T5), extractive (RoBERTa), or context-only",
+        "--mode", choices=["generative", "extractive", "context", "ollama"], default="generative",
+        help="QA mode: generative (Flan-T5), extractive (RoBERTa), context-only, or ollama (local LLM)",
+    )
+    parser.add_argument(
+        "--ollama-model", default="phi3:mini",
+        help="Ollama model name to use (default: phi3:mini)",
+    )
+    parser.add_argument(
+        "--ollama-url", default="http://localhost:11434",
+        help="Ollama server URL (default: http://localhost:11434)",
     )
     parser.add_argument(
         "--top-k", type=int, default=3,
@@ -67,6 +75,8 @@ def main():
         retriever_method=args.retriever,
         qa_mode=args.mode,
         device=args.device,
+        ollama_model=args.ollama_model,
+        ollama_url=args.ollama_url,
     )
 
     if args.interactive:

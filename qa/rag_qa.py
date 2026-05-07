@@ -36,6 +36,7 @@ class RAGQuestionAnswerer:
     Retrieves relevant context and answers questions using either:
     - Extractive QA (deepset/roberta-base-squad2)
     - Generative QA (google/flan-t5-small)
+    - Ollama LLM (any local model via Ollama, e.g. phi3:mini, llama3.2)
     - Context-only (no model, just returns retrieved context)
     """
 
@@ -45,11 +46,15 @@ class RAGQuestionAnswerer:
         retriever_method: str = "bm25",
         qa_mode: str = "generative",
         device: str = "cpu",
+        ollama_model: str = "phi3:mini",
+        ollama_url: str = "http://localhost:11434",
     ):
         self.corpus = corpus or BUILTIN_CORPUS
         self.retriever_method = retriever_method
         self.qa_mode = qa_mode
         self.device = device
+        self.ollama_model = ollama_model
+        self.ollama_url = ollama_url
 
         ret_cfg = RetrieverConfig(method=retriever_method)
         if retriever_method == "bm25":
@@ -97,6 +102,11 @@ class RAGQuestionAnswerer:
                 self.qa_model = None
                 self.qa_tokenizer = None
 
+        elif self.qa_mode == "ollama":
+            logger.info("QA mode set to Ollama LLM: %s at %s", self.ollama_model, self.ollama_url)
+            self.qa_model = None
+            self.qa_tokenizer = None
+
         elif self.qa_mode == "context":
             logger.info("QA mode set to context-only (no answer generation model).")
             self.qa_model = None
@@ -116,7 +126,9 @@ class RAGQuestionAnswerer:
         retrieved = self.retriever.retrieve(question, top_k=top_k)
         context = self._build_context(question, retrieved, context_sentences)
 
-        if self.qa_model is not None and self.qa_tokenizer is not None:
+        if self.qa_mode == "ollama":
+            answer_text = self._answer_ollama(question, context)
+        elif self.qa_model is not None and self.qa_tokenizer is not None:
             if self.qa_mode == "generative":
                 answer_text = self._answer_generative(question, context)
             else:
@@ -201,6 +213,37 @@ class RAGQuestionAnswerer:
         answer_tokens = inputs["input_ids"][0][start_idx:end_idx]
         answer = self.qa_tokenizer.decode(answer_tokens, skip_special_tokens=True)
         return answer.strip()
+
+    def _answer_ollama(self, question: str, context: str) -> str:
+        """Send question + retrieved context to a local Ollama LLM and return the answer."""
+        import json
+        import urllib.request
+
+        prompt = (
+            f"You are a helpful assistant. Answer the question using only the provided context. "
+            f"Be concise and factual.\n\n"
+            f"Context: {context}\n\n"
+            f"Question: {question}\n\n"
+            f"Answer:"
+        )
+        payload = json.dumps({
+            "model": self.ollama_model,
+            "prompt": prompt,
+            "stream": False,
+        }).encode("utf-8")
+
+        try:
+            req = urllib.request.Request(
+                f"{self.ollama_url}/api/generate",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                return result.get("response", "").strip()
+        except Exception as e:
+            logger.error("Ollama request failed: %s", e)
+            return f"[Ollama error: {e}]"
 
     def _answer_context_only(self, question: str, context: str) -> str:
         """Return retrieved context as the 'answer' when no QA model is available."""

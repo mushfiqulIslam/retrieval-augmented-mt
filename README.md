@@ -1,6 +1,50 @@
-# Retrieval-Augmented Generation (RAG) — Domain-Specific MT & QA
+# Domain-Specific RAG with LLM, NMT, and QA — Finnish Culture Knowledge Base
 
-**TIES 4911 Mini Project — Option 7: Retrieval-Augmented Generation**
+---
+
+### prepare two terminals
+
+**Terminal 1 — Start Ollama LLM server (keep open)**
+```bash
+OLLAMA_MODELS=/mnt/d/ollama/models /mnt/d/ollama/bin/ollama serve
+```
+You should see: `Listening on 127.0.0.1:11434`
+
+**Terminal 2 — Activate environment**
+```bash
+cd ~/projects/retrieval-augmented-mt
+source .venv/bin/activate
+```
+
+---
+
+### Show all 20 questions evaluated by the LLM
+```bash
+python run_qa.py --mode ollama --retriever bm25
+```
+Expected: **95% accuracy, 19/20 correct answers**
+
+---
+
+### Live interactive QA with phi3:mini
+```bash
+python run_qa.py --mode ollama --interactive
+```
+Good questions to ask live:
+- `What is the role of sauna in Finnish culture?`
+- `What animals live in Finland?`
+- `What is the Kalevala?`
+- `When did Finland declare independence?`
+- `What natural phenomenon can be seen in Lapland?`
+
+---
+
+### Show RAG-MT results (optional)
+```bash
+python run_experiments.py --quick --device cpu
+```
+
+---
 
 This project demonstrates the RAG paradigm with two complementary applications over a Finnish-culture domain knowledge base:
 
