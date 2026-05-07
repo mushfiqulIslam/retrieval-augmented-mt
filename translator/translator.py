@@ -12,11 +12,11 @@ class Translator:
     """
     Wrapper around Helsinki-NLP/opus-mt-en-fi (MarianMT).
     """
-    def __init__(self, cfg: TranslatorConfig):
+    def __init__(self, cfg: TranslatorConfig, device: str = "cpu"):
         self.cfg = cfg
         self._model     = None
         self._tokenizer = None
-        self._device    = None
+        self._device    = torch.device(device)
         self._load_model()
 
     def _load_model(self):
@@ -29,7 +29,6 @@ class Translator:
         self._tokenizer = MarianTokenizer.from_pretrained(self.cfg.model_name)
         self._model     = MarianMTModel.from_pretrained(self.cfg.model_name)
 
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._model  = self._model.to(self._device)
         self._model.eval()  # inference mode
 

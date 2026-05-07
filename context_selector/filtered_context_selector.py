@@ -11,10 +11,10 @@ class FilteredContextSelector:
     System C context selector: score sentences, select top-N.
     """
 
-    def __init__(self, cfg):
+    def __init__(self, cfg, device: str = "cpu"):
         self.cfg        = cfg
         self.segmenter  = SentenceSegmenter(method=cfg.sentence_splitter)
-        self.scorer     = build_scorer(cfg)
+        self.scorer     = build_scorer(cfg, device=device)
         logger.info(
             f"FilteredContextSelector initialized: "
             f"scorer={cfg.scoring_method}, splitter={cfg.sentence_splitter}"

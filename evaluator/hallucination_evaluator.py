@@ -6,13 +6,13 @@ logger = logging.getLogger(__name__)
 
 class HallucinationEvaluator:
     """
-    NER-based hallucination detector.
+    Lightweight entity novelty heuristic.
     Metric (from spec):
-      hallucination_rate = (entities in output NOT in source or context) / (total output entities)
+      entity_novelty_rate = (entities in output NOT in source or context) / (total output entities)
 
     Named entities are extracted from the English source and context,
-    and from the Finnish translation output.
-
+    and from the Finnish translation output. This is not a robust
+    hallucination benchmark, especially for cross-lingual entity matching.
     """
     def __init__(self, spacy_model= "en_core_web_sm"):
         self.spacy_model = spacy_model
@@ -31,7 +31,7 @@ class HallucinationEvaluator:
                 )
                 self._nlp = None
         except ImportError:
-            logger.warning("spaCy not installed. Hallucination evaluation will use regex fallback.")
+            logger.warning("spaCy not installed. Entity novelty heuristic will use regex fallback.")
             self._nlp = None
 
     def _extract_entities_spacy(self, text):

@@ -16,18 +16,12 @@ class SentenceSegmenter:
     def _init_segmenter(self):
         if self.method == "nltk":
             try:
-                nltk.data.find("tokenizers/punkt_tab")
-            except LookupError:
-                nltk.download("punkt_tab", quiet=True)
-
-            try:
                 nltk.data.find("tokenizers/punkt")
-            except LookupError:
-                nltk.download("punkt", quiet=True)
-
-            try:
                 self._tokenize = sent_tokenize
                 logger.debug("Sentence segmenter: NLTK punkt.")
+            except LookupError:
+                logger.warning("NLTK punkt data not available. Falling back to regex sentence splitter.")
+                self._tokenize = self._regex_split
             except ImportError:
                 logger.warning("NLTK not available. Falling back to regex sentence splitter.")
                 self._tokenize = self._regex_split

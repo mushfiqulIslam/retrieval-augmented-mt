@@ -3,7 +3,6 @@ import time
 from typing import List, Dict
 
 import numpy as np
-import torch
 from sentence_transformers import SentenceTransformer
 
 from retriever.base import BaseRetriever
@@ -14,8 +13,7 @@ logger = logging.getLogger(__name__)
 class DenseRetriever(BaseRetriever):
     def _build_index(self) -> None:
         logger.info(f"Loading dense model: {self.cfg.dense_model}")
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        self._model = SentenceTransformer(self.cfg.dense_model, device=device)
+        self._model = SentenceTransformer(self.cfg.dense_model, device=self.device)
 
         logger.info(f"Encoding {len(self.corpus)} documents...")
         start = time.perf_counter()
