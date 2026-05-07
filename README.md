@@ -1,8 +1,13 @@
-# retrieval-augmented-mt (RAG-MT)
+# Retrieval-Augmented Generation (RAG) — Domain-Specific MT & QA
 
-Research-oriented experiment runner for **English → Finnish** machine translation with retrieval-augmented context and context selection.
+**TIES 4911 Mini Project — Option 7: Retrieval-Augmented Generation**
 
-The code evaluates three systems:
+This project demonstrates the RAG paradigm with two complementary applications over a Finnish-culture domain knowledge base:
+
+1. **RAG-MT**: Retrieval-Augmented Machine Translation (English → Finnish) — enhances MarianMT with domain context at inference time.
+2. **RAG-QA**: Retrieval-Augmented Question Answering — answers questions about Finnish culture using retrieved evidence.
+
+The RAG-MT pipeline evaluates three systems:
 
 - **System A (MT-Only)**: baseline MarianMT translation with no retrieved context.
 - **System B (RAG-Naïve)**: retrieves top-k English documents and injects the full retrieved text as context.
@@ -14,13 +19,16 @@ It also runs ablations (e.g., random sentence selection) and reports BLEU, COMET
 
 ## Repository layout
 
-- `run_experiments.py` — CLI entrypoint.
+- `run_experiments.py` — CLI entrypoint for RAG-MT experiments.
+- `run_qa.py` — CLI entrypoint for RAG-QA (interactive/evaluation).
 - `systems/` — orchestration + implementations of Systems A/B/C.
-- `retriever/` — BM25 and dense retrieval + caching wrapper.
+- `retriever/` — BM25 and dense retrieval + caching wrapper (shared).
 - `context_selector/` — sentence segmentation and context scoring/selection.
+- `qa/` — RAG-based question answering module.
 - `translator/` — MarianMT wrapper (Helsinki-NLP/opus-mt-en-fi).
 - `evaluator/` — BLEU, COMET/chrF, entity novelty heuristic, efficiency.
 - `utils/` — config schema, data loading, corpus sampling, I/O helpers.
+- `MiniProject_Tutorial.md` — Complete step-by-step tutorial (this project's main deliverable).
 
 ---
 
@@ -55,16 +63,20 @@ the project virtual environment. In that case, prefer `uv pip install ...` or
 
 ### Quick smoke run
 
-Use built-in sample data, a tiny test set, and no COMET download:
+Run both MT and QA pipelines:
 
 ```bash
+# RAG-MT quick smoke test
 python run_experiments.py --quick --device auto
-```
 
-To reproduce the presentation-style setup with the 20-document built-in corpus:
+# RAG-QA evaluation (context-only mode)
+python run_qa.py --mode context
 
-```bash
-python run_experiments.py --profile presentation --retrievers bm25 dense
+# RAG-QA single question
+python run_qa.py --question "What is the capital of Finland?"
+
+# RAG-QA interactive session
+python run_qa.py --interactive
 ```
 
 The resolved configuration is saved to `results/experiment_config.json`, and
